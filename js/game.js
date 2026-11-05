@@ -1452,6 +1452,7 @@
       S.solved["act3-" + S.act3Step] = true;
       toast(lock.solvedText, "good");
       S.act3Step++;
+      S.puzzle.act3tab = "A"; // 다음 잠금장치는 항상 첫 역할(라이프스타일 식품) 단서부터 보여 준다
       save();
       setTimeout(() => { if (S.act3Step >= T.locks.length) go("ending"); else { renderAct3(); renderHeader(); runDemos(); } }, 700);
     });
