@@ -701,7 +701,7 @@
         <div class="cine-layer now"><img src="${N.now.img}" alt="${esc(N.now.alt)}"></div>
         <div class="cine-grain" aria-hidden="true"></div><div class="cine-shade" aria-hidden="true"></div>
         <div class="cine-top">
-          <div class="cine-brand"><i class="brand-mark">CJ</i>제일제당 온보딩</div>
+          <div class="cine-brand"><img class="brand-logo" src="assets/ci/cj_logo_white.svg" alt="CJ제일제당"><span>신입 온보딩</span></div>
           <div class="cine-tools">
             <button class="cine-chip" id="c-auto">${ic("ti-player-play")} 자동으로 보기</button>
             <button class="cine-chip" id="c-skip">${ic("ti-player-skip-forward")} 건너뛰기</button>

@@ -21,17 +21,12 @@ node tools/serve.js
 | `tools/hash.js` | 정답을 바꿀 때 해시 만들기: `node tools/hash.js 새정답` |
 | `tools/serve.js` | 로컬 미리보기 서버 |
 
-## 서체 (CJ ONLYONE NEW)
-제목은 CJ ONLYONE NEW title, 본문은 CJ ONLYONE NEW body를 씁니다.
-
-- CJ ONLYONE은 **CJ그룹 전용 서체**라서 글꼴 파일을 사이트에 넣지 않았습니다.
-  파일을 넣고 배포하면 누구나 그 파일을 내려받을 수 있게 되기 때문입니다.
-- 대신 `css/style.css` 맨 위의 `@font-face`가 **보는 사람 PC에 설치된 CJ 서체를 이름으로 찾아** 씁니다.
-  - CJ 임직원 PC처럼 서체가 설치돼 있으면 → CJ ONLYONE으로 보임
-  - 설치돼 있지 않으면 → Pretendard로 대체
-- 내 PC에서 CJ 서체로 보고 싶으면 서체를 PC에 설치하고 브라우저를 다시 열면 됩니다.
-  (공식 배포처: CJ 계열사 뉴스룸의 브랜드 자료실)
-- 설치했는데도 적용되지 않으면, 설치된 서체의 정확한 이름을 `@font-face`의 `local("...")` 목록에 추가하세요.
+## 서체와 로고
+- 서체: **CJ ONLYONE** (cj.co.kr에서 쓰는 웹 글꼴). `assets/fonts`에 300·400·600·700 굵기를 넣어 함께 배포해서, CJ 서체가 없는 PC·휴대폰에서도 같은 글꼴로 보입니다. 제목은 700을 씁니다.
+- 로고: cj.co.kr 상단 로고 원본 SVG를 그대로 씁니다.
+  - `assets/ci/cj_logo_black.svg`: 검은 글자, 밝은 상단바용
+  - `assets/ci/cj_logo_white.svg`: 흰 글자, 시작 화면(사진 위)용
+- CJ제일제당 제출·시연용 비공식 포트폴리오라서 CJ 자산을 그대로 썼습니다. 다른 곳에 공개할 때는 서체·로고 사용 권한을 먼저 확인하세요.
 
 ## 문구를 고칠 때
 - **팝업**은 `lines: [...]` 줄 배열로 씁니다. 줄끼리 글자 수 차이는 30% 이내로 맞춥니다.

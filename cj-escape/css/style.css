@@ -1,39 +1,17 @@
-/* ═════════ CJ 전용 서체 (CJ ONLYONE NEW) ═════════
- * CJ ONLYONE은 CJ그룹 전용 서체라서 글꼴 파일을 사이트에 넣어 배포하지 않는다.
- * 대신 보는 사람의 컴퓨터에 설치된 CJ 서체를 이름으로 찾아 쓴다 (local).
- * - CJ 임직원 PC처럼 서체가 설치돼 있으면 → CJ ONLYONE으로 보임
- * - 설치돼 있지 않으면 → Pretendard로 자연스럽게 대체
- * 설치 이름이 PC마다 조금씩 달라서 알려진 이름을 여러 개 적어 둔다.
+/* ═════════ CJ 전용 서체 (CJ ONLYONE) ═════════
+ * cj.co.kr에서 쓰는 웹 글꼴 파일을 assets/fonts에 넣어 함께 배포한다.
+ * 그래서 CJ 서체가 설치되지 않은 PC·휴대폰에서도 CJ ONLYONE으로 보인다.
+ * 굵기: 300 가는 · 400 본문 · 600 강조 · 700 제목
+ * 제목 전용 서체는 공개된 파일이 없어 같은 서체의 700을 쓴다.
  */
-@font-face {
-  font-family: "CJ Title";
-  font-weight: 400 900;
-  font-display: swap;
-  src: local("CJ ONLYONE NEW title Bold"), local("CJONLYONENEWtitleBold"),
-       local("CJ ONLYONE NEW title Medium"), local("CJONLYONENEWtitleMedium"),
-       local("CJ ONLYONE NEW title"), local("CJONLYONENEWtitle"),
-       local("CJ ONLYONE NEW 제목 Bold"), local("CJ ONLYONE NEW 제목");
-}
-@font-face {
-  font-family: "CJ Body";
-  font-weight: 100 500;
-  font-display: swap;
-  src: local("CJ ONLYONE NEW body Regular"), local("CJONLYONENEWbodyRegular"),
-       local("CJ ONLYONE NEW body"), local("CJONLYONENEWbody"),
-       local("CJ ONLYONE NEW 본문 Regular"), local("CJ ONLYONE NEW 본문");
-}
-@font-face {
-  font-family: "CJ Body";
-  font-weight: 600 900;
-  font-display: swap;
-  src: local("CJ ONLYONE NEW body Bold"), local("CJONLYONENEWbodyBold"),
-       local("CJ ONLYONE NEW body Medium"), local("CJONLYONENEWbodyMedium"),
-       local("CJ ONLYONE NEW 본문 Bold");
-}
+@font-face { font-family: "CJ ONLYONE"; font-weight: 300; font-display: swap; src: url("../assets/fonts/CJ_ONLYONE_300.woff2") format("woff2"); }
+@font-face { font-family: "CJ ONLYONE"; font-weight: 400 500; font-display: swap; src: url("../assets/fonts/CJ_ONLYONE_400.woff2") format("woff2"); }
+@font-face { font-family: "CJ ONLYONE"; font-weight: 600; font-display: swap; src: url("../assets/fonts/CJ_ONLYONE_600.woff2") format("woff2"); }
+@font-face { font-family: "CJ ONLYONE"; font-weight: 700 900; font-display: swap; src: url("../assets/fonts/CJ_ONLYONE_700.woff2") format("woff2"); }
 
 :root {
-  --font-title: "CJ Title", "CJ Body", "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-  --font-body: "CJ Body", "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-title: "CJ ONLYONE", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-body: "CJ ONLYONE", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --red: #E8392B;
   --orange: #F39200;
   --yellow: #FFC20E;
@@ -725,8 +703,8 @@ body { background:
   border-bottom: 1px solid var(--line); }
 .brand { color: var(--ink); }
 .brand span { font-weight: 700; }
-.brand-mark { width: 28px; height: 28px; border-radius: 8px; display: inline-grid; place-items: center; background: var(--ink); color: #fff;
-  font-style: normal; font-weight: 800; font-size: 12px; letter-spacing: -.02em; flex: none; }
+.brand-logo { height: 28px; width: auto; display: block; flex: none; }
+.brand > span { padding-left: 12px; border-left: 1px solid var(--line); }
 .time { color: var(--ink); } .time small { color: var(--red-ink); }
 .btn.ghost { background: rgba(255,255,255,.7); color: var(--ink); border: 1px solid var(--line); }
 .btn.ghost:hover:not(:disabled) { background: #fff; }
@@ -839,7 +817,8 @@ body.is-intro main { max-width: none; padding: 0; min-height: 0; }
 
 .cine-top { position: absolute; top: 20px; left: 24px; right: 24px; z-index: 5; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .cine-brand { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: rgba(255,255,255,.88); white-space: nowrap; }
-.cine-brand .brand-mark { background: #fff; color: #111; }
+.cine-brand .brand-logo { height: 30px; }
+.cine-brand span { padding-left: 10px; border-left: 1px solid rgba(255,255,255,.35); }
 .cine-tools { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .cine-chip { border: none; cursor: pointer; font: inherit; font-size: 13px; color: #fff; background: rgba(255,255,255,.16); backdrop-filter: blur(10px);
   padding: 8px 12px; border-radius: 999px; display: inline-flex; gap: 6px; align-items: center; white-space: nowrap; min-height: 36px; }
