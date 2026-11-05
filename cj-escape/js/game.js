@@ -182,7 +182,10 @@
       const steps = G.coach.filter((s) => $(s.target));
       let i = 0;
       guideOpen = true;
-      const finish = () => { wrap.hidden = true; guideOpen = false; window.removeEventListener("resize", place); resolve(); };
+      const finish = () => { wrap.hidden = true; guideOpen = false; window.removeEventListener("resize", place); window.removeEventListener("scroll", onScroll, true); resolve(); };
+      /* 스크롤해도 강조 상자가 대상을 따라가도록 (부드러운 스크롤 중에도 계속 맞춤) */
+      let ticking = false;
+      const onScroll = () => { if (ticking) return; ticking = true; requestAnimationFrame(() => { ticking = false; place(); }); };
       const place = () => {
         const el = $(steps[i].target);
         if (!el) return;
@@ -217,6 +220,7 @@
         $("#c-next").focus();
       };
       window.addEventListener("resize", place);
+      window.addEventListener("scroll", onScroll, { passive: true, capture: true });
       wrap.hidden = false;
       show();
     });
