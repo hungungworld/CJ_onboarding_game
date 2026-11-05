@@ -44,8 +44,22 @@
       .join("")
       .replace(/\n/g, "<br>");
   }
-  // 본문용: 직접 넣은 줄바꿈은 무시하고 너비에 맞춰 자연스럽게 감기게 (의미 단위 묶음은 유지)
-  const body = (s) => fix(s == null ? "" : String(s).replace(/\s*\n\s*/g, " "));
+  /* 대본 규칙: 한 줄 = 한 호흡
+   * - 문단(블록) 하나가 4줄 이하면 대본에 적은 줄바꿈(\n)을 그대로 살린다 (대사·쪽지·메모·안내)
+   * - 5줄 이상인 긴 문단만 줄바꿈을 지우고 너비에 맞춰 자동으로 감는다
+   * - 문단은 <p>, <li> 같은 블록 태그 단위로 따로 센다 */
+  const BLOCK = /(<\/?(?:p|li|ul|ol|div|table|tr|td|th)\b[^>]*>)/;
+  const body = (s) => {
+    if (s == null) return "";
+    const out = String(s).split(BLOCK).map((seg) => {
+      if (BLOCK.test(seg)) return seg;
+      const n = (seg.match(/\n/g) || []).length + 1;
+      return n <= 4 ? seg.replace(/[ \t]*\n[ \t]*/g, "\n") : seg.replace(/\s*\n\s*/g, " ");
+    }).join("");
+    return fix(out);
+  };
+  // 좁은 카드 여러 장이 나란히 놓일 때(증언 카드): 길이와 상관없이 자동으로 감아 카드끼리 모양을 맞춘다
+  const flow = (s) => fix(s == null ? "" : String(s).replace(/\s*\n\s*/g, " "));
   const lines = (arr) => arr.map((l) => `<span class="ln">${fix(l)}</span>`).join("");
 
   // 아이콘: 콘텐츠의 "ti-…" 값을 선 아이콘으로
@@ -1319,7 +1333,7 @@
         <div class="suspects" ${allQ ? 'data-demo="accuse"' : ""}>${A.suspects.map((s, i) => `
           <article class="suspect">
             <div class="s-head"><span class="s-emoji">${ic(s.emoji)}</span><div><b>${s.name}</b><small>${s.dept}</small></div></div>
-            <p>${body(s.testimony)}</p>
+            <p>${flow(s.testimony)}</p>
             ${allQ ? holdBtn('<i class="ti ti-hand-finger" aria-hidden="true"></i> 길게 눌러 지목', "small accuse").replace("<button", `<button data-accuse="${i}"`) : ""}
           </article>`).join("")}</div>
         <div class="card">
