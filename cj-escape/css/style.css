@@ -928,3 +928,22 @@ p, li { text-wrap: pretty; }
 .modal-box.dialog .modal-body { padding: 12px 24px 26px; }
 .modal-box.dialog .modal-body p { margin-left: auto; margin-right: auto; text-wrap: balance; }
 .modal-box.dialog .row { justify-content: center; margin-top: 20px; }
+
+/* 장면 바로 가기: 막별로 묶어서 한 줄씩 (왼쪽 막 이름, 오른쪽 장면) */
+.jump-list { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 0; }
+.jump-row { display: grid; grid-template-columns: 132px 1fr; gap: 16px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+.jump-row:first-child { border-top: none; padding-top: 4px; }
+.jump-act { margin: 0; display: flex; flex-direction: column; gap: 2px; }
+.jump-act b { font-size: 13px; font-weight: 700; color: var(--red-ink); }
+.jump-act span { font-size: 13px; color: var(--sub); }
+.jump-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.jump-btns .btn { min-height: 40px; }
+.jump-no { display: inline-grid; place-items: center; width: 18px; height: 18px; margin-right: 6px; border-radius: 50%; background: var(--red-soft); color: var(--red-ink); font-size: 11px; font-weight: 700; }
+@media (max-width: 520px) {
+  .jump-row { grid-template-columns: 1fr; gap: 8px; }
+  .jump-act { flex-direction: row; gap: 8px; align-items: baseline; }
+}
+
+/* 시작 화면(어두운 사진) 위에 뜨는 팝업: 유리 대신 흰 바탕으로 또렷하게 */
+body.is-intro .modal-box { background: #fff; backdrop-filter: none; -webkit-backdrop-filter: none; }
+body.is-intro .modal { background: rgba(10,8,6,.55); }

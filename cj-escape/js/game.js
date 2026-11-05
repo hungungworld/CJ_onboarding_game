@@ -832,14 +832,23 @@
       for (const stop of [0.4667, 1]) {
         await moveTo(stop, run);
         if (run !== autoRun) return;
-        if (stop < 1) await sleep(REDUCED ? 0 : 3800);
+        if (stop < 1) await sleep(REDUCED ? 0 : 2400); // 2010 문장 읽는 시간
         if (run !== autoRun) return;
       }
     };
     $("#c-skip").onclick = () => { autoRun++; arrive(); };
     $("#c-jump").onclick = () => openModal(`${ic("ti-list")} 장면 바로 가기`,
-      `<p class="note">${prose("심사·데모용이에요. 고른 장면부터 바로 시작해요.")}</p>
-       <div class="chips">${STEPS.map((s, i) => `<button class="btn small" data-jump="${s}">${STEP_LABEL[i]}</button>`).join("")}</div>`,
+      `<p class="note">${fix("심사·데모용이에요. 고른 장면부터 바로 시작해요.")}</p>
+       <ol class="jump-list">${[
+         { act: "시작", name: "", ids: ["prologue"] },
+         { act: "1막", name: "70년의 DNA", ids: ["room1", "room2", "room3", "room4", "room5"], num: true },
+         { act: "2막", name: "사라진 레시피북", ids: ["act2"] },
+         { act: "3막", name: "30주년 타임캡슐", ids: ["act3"] },
+         { act: "끝", name: "", ids: ["ending"] }
+       ].map((g) => `<li class="jump-row">
+           <p class="jump-act"><b>${g.act}</b>${g.name ? `<span>${g.name}</span>` : ""}</p>
+           <div class="jump-btns">${g.ids.map((id, k) => `<button class="btn small" data-jump="${id}">${g.num ? `<span class="jump-no">${k + 1}</span>` : ""}${STEP_LABEL[STEPS.indexOf(id)]}</button>`).join("")}</div>
+         </li>`).join("")}</ol>`,
       (b) => $$("[data-jump]", b).forEach((x) => (x.onclick = () => { closeModal(); demoJump(x.dataset.jump); })));
 
     $("#b-start").onclick = async () => {
