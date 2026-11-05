@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>미리보기: 3D 금고 자물쇠</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; color: #1F1F1F;
+    font-family: "CJ Body", "Pretendard", sans-serif; word-break: keep-all;
+    background: radial-gradient(ellipse at 50% 0%, #FFF4E2 0%, #F7EBDD 45%, #E9DCCB 100%);
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 24px 20px 40px; }
+  .eyebrow { margin: 0; text-align: center; font-size: 13px; font-weight: 700; color: #C8281C; letter-spacing: .04em; }
+  h1 { margin: 4px 0 4px; text-align: center; font-size: 24px; letter-spacing: -.02em; }
+  .note { margin: 0 0 16px; text-align: center; color: #6B6B6B; font-size: 14px; }
+
+  .stage { position: relative; height: 460px; border-radius: 24px; overflow: hidden;
+    background: radial-gradient(ellipse at 50% 35%, #FFF8EC 0%, #F1E3D1 60%, #DCCAB4 100%);
+    box-shadow: inset 0 0 0 1px rgba(90,60,30,.08), 0 20px 40px -20px rgba(90,60,30,.35); }
+  canvas { display: block; width: 100%; height: 100%; }
+  .hint { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); font-size: 12px; color: #6B5A44; background: rgba(255,255,255,.7); padding: 4px 12px; border-radius: 999px; backdrop-filter: blur(4px); }
+
+  .panel { margin-top: 20px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .tiles { display: flex; gap: 8px; }
+  .tile { width: 44px; height: 54px; border-radius: 10px; perspective: 400px; }
+  .tile b { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; border-radius: 10px;
+    font-size: 24px; font-weight: 800; color: #2b2f34;
+    background: linear-gradient(180deg, #ffffff, #e7e9ec); box-shadow: inset 0 -3px 0 #c5cad0, 0 3px 6px rgba(0,0,0,.12);
+    transform: rotateX(90deg); transition: transform .28s cubic-bezier(.3,1.6,.5,1); }
+  .tile.on b { transform: rotateX(0); }
+  .tile.bad b { color: #C8281C; }
+  .tiles.shake { animation: shake .45s; }
+  @keyframes shake { 20%,60% { transform: translateX(-8px); } 40%,80% { transform: translateX(8px); } }
+
+  .btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .b3d { position: relative; border: none; cursor: pointer; font: inherit; font-size: 17px; font-weight: 700; color: #fff;
+    padding: 14px 30px; border-radius: 16px; background: linear-gradient(180deg, #E8463A, #C8281C);
+    box-shadow: 0 6px 0 #8E1A12, 0 12px 18px -6px rgba(142,26,18,.55), inset 0 1px 0 rgba(255,255,255,.35);
+    transition: transform .08s, box-shadow .08s; }
+  .b3d:hover { filter: brightness(1.05); }
+  .b3d:active, .b3d.pressed { transform: translateY(6px); box-shadow: 0 0 0 #8E1A12, 0 4px 8px -4px rgba(142,26,18,.55), inset 0 1px 0 rgba(255,255,255,.35); }
+  .b3d.gray { color: #2b2f34; background: linear-gradient(180deg, #ffffff, #e4e6e9); box-shadow: 0 6px 0 #b5bbc2, 0 12px 18px -6px rgba(0,0,0,.25), inset 0 1px 0 #fff; }
+  .b3d.gray:active, .b3d.gray.pressed { box-shadow: 0 0 0 #b5bbc2, 0 4px 8px -4px rgba(0,0,0,.25), inset 0 1px 0 #fff; }
+  .b3d:disabled { opacity: .5; cursor: default; transform: none; }
+  .b3d:focus-visible { outline: 3px solid #B35F00; outline-offset: 3px; }
+
+  .result { opacity: 0; transform: translateY(12px) scale(.96); transition: all .5s cubic-bezier(.3,1.4,.5,1); pointer-events: none;
+    background: #fff; border-radius: 18px; padding: 18px 24px; text-align: center; box-shadow: 0 16px 30px -12px rgba(90,60,30,.4); }
+  .result.show { opacity: 1; transform: none; pointer-events: auto; }
+  .result h2 { margin: 0 0 4px; font-size: 22px; color: #0E7A45; }
+  .result p { margin: 0; color: #6B5A44; font-size: 15px; }
+  .compare { margin-top: 28px; text-align: center; font-size: 14px; }
+  .compare a { color: #B35F00; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">미리보기 · 게임에는 아직 적용 안 함</p>
+    <h1>3D 금고 자물쇠</h1>
+    <p class="note">마우스를 움직이면 금고가 따라 기울어요. 버튼을 눌러 보세요.</p>
+
+    <div class="stage" id="stage">
+      <span class="hint" id="hint">마우스로 금고를 둘러보세요</span>
+    </div>
+
+    <div class="panel">
+      <div class="tiles" id="tiles" aria-label="비밀번호 칸"></div>
+      <div class="btns">
+        <button class="b3d gray" id="wrong">틀린 번호 넣기</button>
+        <button class="b3d" id="open">ONLYONE 넣고 열기</button>
+        <button class="b3d gray" id="reset">다시 닫기</button>
+      </div>
+      <div class="result" id="result" role="status" aria-live="polite">
+        <h2>문이 열렸어요!</h2>
+        <p>금고 안에서 다음 방 열쇠가 나왔어요.</p>
+      </div>
+    </div>
+    <p class="compare">비교: <a href="safe-demo.html">평평한 버전 보기</a></p>
+  </div>
+
+<script type="module">
+import * as THREE from "three";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const stage = document.getElementById("stage");
+
+/* ───── 렌더러 · 장면 · 카메라 ───── */
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.25;
+stage.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+
+const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+const camBase = new THREE.Vector3(2.4, 2.3, 7.2);
+const camClose = new THREE.Vector3(1.5, 2.0, 6.6);
+const look = new THREE.Vector3(0, 1.35, 0);
+camera.position.copy(camBase);
+
+/* ───── 조명: 위에서 한 방향 ───── */
+scene.add(new THREE.HemisphereLight(0xfff4e6, 0x8a6a4a, 0.6));
+const sun = new THREE.DirectionalLight(0xffffff, 3);
+sun.position.set(3, 6, 4);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left: -4, right: 4, top: 4, bottom: -2, near: 1, far: 20 });
+sun.shadow.radius = 6;
+scene.add(sun);
+const rim = new THREE.DirectionalLight(0xffd8a8, 1.2);
+rim.position.set(-4, 3, -3);
+scene.add(rim);
+
+/* 바닥 그림자 */
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.ShadowMaterial({ opacity: 0.22 }));
+floor.rotation.x = -Math.PI / 2;
+floor.receiveShadow = true;
+scene.add(floor);
+
+/* ───── 재질 ───── */
+const gunmetal = new THREE.MeshStandardMaterial({ color: 0x7d8794, metalness: 0.65, roughness: 0.34 });
+const steel = new THREE.MeshStandardMaterial({ color: 0xc9ced4, metalness: 0.9, roughness: 0.22 });
+const darkSteel = new THREE.MeshStandardMaterial({ color: 0x4a5059, metalness: 0.7, roughness: 0.38 });
+const lining = new THREE.MeshStandardMaterial({ color: 0x5a1712, metalness: 0.05, roughness: 0.9 });
+const gold = new THREE.MeshStandardMaterial({ color: 0xf2b53a, metalness: 1, roughness: 0.22, emissive: 0x3a2400, emissiveIntensity: 0.4 });
+const cjRed = new THREE.MeshStandardMaterial({ color: 0xE8392B, metalness: 0.3, roughness: 0.35 });
+const cjOrange = new THREE.MeshStandardMaterial({ color: 0xF39200, metalness: 0.3, roughness: 0.35 });
+const cjYellow = new THREE.MeshStandardMaterial({ color: 0xFFC20E, metalness: 0.3, roughness: 0.35 });
+
+const mesh = (geo, mat, x = 0, y = 0, z = 0) => {
+  const m = new THREE.Mesh(geo, mat);
+  m.position.set(x, y, z);
+  m.castShadow = m.receiveShadow = true;
+  return m;
+};
+
+/* ───── 금고 몸체 (앞이 뚫린 상자) ───── */
+const W = 2.2, H = 2.3, D = 1.8, T = 0.16, LIFT = 0.12;
+const safe = new THREE.Group();
+scene.add(safe);
+const body = new THREE.Group();
+body.position.y = LIFT;
+safe.add(body);
+body.add(mesh(new THREE.BoxGeometry(W, H, T), gunmetal, 0, H / 2, -D / 2 + T / 2));
+body.add(mesh(new THREE.BoxGeometry(T, H, D), gunmetal, -W / 2 + T / 2, H / 2, 0));
+body.add(mesh(new THREE.BoxGeometry(T, H, D), gunmetal, W / 2 - T / 2, H / 2, 0));
+body.add(mesh(new THREE.BoxGeometry(W, T, D), gunmetal, 0, H - T / 2, 0));
+body.add(mesh(new THREE.BoxGeometry(W, T, D), gunmetal, 0, T / 2, 0));
+/* 안쪽 벨벳 */
+body.add(mesh(new THREE.BoxGeometry(W - 2 * T, H - 2 * T, 0.02), lining, 0, H / 2, -D / 2 + T + 0.01));
+body.add(mesh(new THREE.BoxGeometry(W - 2 * T, 0.02, D - T), lining, 0, T + 0.01, 0.0));
+/* 받침대 */
+body.add(mesh(new THREE.CylinderGeometry(0.28, 0.34, 0.5, 32), steel, 0, T + 0.25, -0.15));
+/* 다리 */
+for (const [x, z] of [[-0.85, 0.65], [0.85, 0.65], [-0.85, -0.65], [0.85, -0.65]])
+  safe.add(mesh(new THREE.CylinderGeometry(0.09, 0.11, LIFT, 20), darkSteel, x, LIFT / 2, z));
+
+/* 안쪽 빛 */
+const glow = new THREE.PointLight(0xffc56b, 0, 4, 1.6);
+glow.position.set(0, LIFT + H / 2, 0.2);
+safe.add(glow);
+
+/* ───── 문 (왼쪽 경첩 기준으로 회전) ───── */
+const DW = W - 0.06, DH = H - 0.06, DT = 0.22;
+const door = new THREE.Group();
+door.position.set(-W / 2 + 0.03, LIFT + H / 2, D / 2 + 0.01);
+safe.add(door);
+const slab = mesh(new THREE.BoxGeometry(DW, DH, DT), gunmetal, DW / 2, 0, DT / 2);
+door.add(slab);
+/* 문 앞면 테두리 패널 */
+door.add(mesh(new THREE.BoxGeometry(DW - 0.32, DH - 0.32, 0.04), darkSteel, DW / 2, 0, DT + 0.02));
+/* 모서리 볼트 머리 */
+for (const [x, y] of [[0.22, 0.9], [DW - 0.22, 0.9], [0.22, -0.9], [DW - 0.22, -0.9]]) {
+  const bolt = mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.05, 20), steel, x, y, DT + 0.03);
+  bolt.rotation.x = Math.PI / 2;
+  door.add(bolt);
+}
+/* 경첩 */
+for (const y of [0.75, -0.75]) door.add(mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.34, 20), steel, -0.02, y, DT / 2));
+
+/* 다이얼 */
+const dial = new THREE.Group();
+dial.position.set(DW / 2, 0.32, DT + 0.04);
+door.add(dial);
+const dialFace = mesh(new THREE.CylinderGeometry(0.36, 0.38, 0.1, 64), steel);
+dialFace.rotation.x = Math.PI / 2;
+dial.add(dialFace);
+const dialCap = mesh(new THREE.CylinderGeometry(0.14, 0.16, 0.08, 40), darkSteel, 0, 0, 0.08);
+dialCap.rotation.x = Math.PI / 2;
+dial.add(dialCap);
+for (let i = 0; i < 40; i++) {
+  const a = (i / 40) * Math.PI * 2, r = 0.3, long = i % 5 === 0;
+  const tick = mesh(new THREE.BoxGeometry(0.012, long ? 0.07 : 0.035, 0.01), darkSteel, Math.sin(a) * r, Math.cos(a) * r, 0.055);
+  tick.rotation.z = -a;
+  dial.add(tick);
+}
+/* 다이얼 위 표시 */
+door.add(mesh(new THREE.ConeGeometry(0.04, 0.08, 3), cjRed, DW / 2, 0.75, DT + 0.06));
+
+/* 손잡이 (바퀴형) */
+const handle = new THREE.Group();
+handle.position.set(DW / 2, -0.45, DT + 0.08);
+door.add(handle);
+const hub = mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.12, 24), steel);
+hub.rotation.x = Math.PI / 2;
+handle.add(hub);
+for (let i = 0; i < 3; i++) {
+  const spoke = mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.62, 12), steel);
+  spoke.rotation.z = (i / 3) * Math.PI;
+  handle.add(spoke);
+  for (const s of [1, -1]) {
+    const knob = mesh(new THREE.SphereGeometry(0.055, 16, 16), steel, Math.sin(spoke.rotation.z) * -0.31 * s, Math.cos(spoke.rotation.z) * 0.31 * s, 0);
+    handle.add(knob);
+  }
+}
+
+/* CJ 꽃잎 엠블럼 */
+const emblem = new THREE.Group();
+emblem.position.set(DW - 0.42, -0.86, DT + 0.05);
+door.add(emblem);
+[[cjRed, -0.06, -0.6], [cjOrange, 0, 0], [cjYellow, 0.06, 0.6]].forEach(([mat, x, rot]) => {
+  const p = mesh(new THREE.SphereGeometry(0.05, 20, 20), mat, x, 0.03 + Math.abs(x) * -0.4, 0);
+  p.scale.set(0.6, 1.1, 0.35);
+  p.rotation.z = -rot;
+  emblem.add(p);
+});
+
+/* 잠금 막대 (문 오른쪽 끝에서 몸체로 들어감) */
+const bars = [];
+for (const y of [0.6, 0, -0.6]) {
+  const bar = mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.3, 16), steel, DW + 0.08, y, DT / 2);
+  bar.rotation.z = Math.PI / 2;
+  door.add(bar);
+  bars.push(bar);
+}
+
+/* ───── 황금 열쇠 ───── */
+const key = new THREE.Group();
+key.position.set(0, LIFT + T + 0.62, -0.15);
+safe.add(key);
+const bow = mesh(new THREE.TorusGeometry(0.16, 0.045, 16, 40), gold, 0, 0.28, 0);
+key.add(bow);
+key.add(mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.5, 16), gold, 0, -0.02, 0));
+key.add(mesh(new THREE.BoxGeometry(0.12, 0.05, 0.03), gold, 0.06, -0.2, 0));
+key.add(mesh(new THREE.BoxGeometry(0.08, 0.05, 0.03), gold, 0.04, -0.1, 0));
+key.scale.setScalar(0.001);
+const keyLight = new THREE.PointLight(0xfff0c0, 0, 2.2, 2);
+key.add(keyLight);
+
+/* ───── 반짝이 입자 ───── */
+const N = 160;
+const spark = (() => {
+  const c = document.createElement("canvas"); c.width = c.height = 64;
+  const g = c.getContext("2d"), grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grd.addColorStop(0, "rgba(255,255,255,1)"); grd.addColorStop(0.3, "rgba(255,214,120,.9)"); grd.addColorStop(1, "rgba(255,180,60,0)");
+  g.fillStyle = grd; g.fillRect(0, 0, 64, 64);
+  return new THREE.CanvasTexture(c);
+})();
+const pGeo = new THREE.BufferGeometry();
+const pPos = new Float32Array(N * 3), pVel = new Float32Array(N * 3);
+pGeo.setAttribute("position", new THREE.BufferAttribute(pPos, 3));
+const pMat = new THREE.PointsMaterial({ size: 0.16, map: spark, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
+const particles = new THREE.Points(pGeo, pMat);
+safe.add(particles);
+function burst() {
+  for (let i = 0; i < N; i++) {
+    pPos.set([0, LIFT + H / 2, 0.3], i * 3);
+    const a = Math.random() * Math.PI * 2, s = 1.2 + Math.random() * 2.2;
+    pVel.set([Math.cos(a) * s * 0.7, 1 + Math.random() * 2.6, 0.8 + Math.random() * 2], i * 3);
+  }
+  pGeo.attributes.position.needsUpdate = true;
+  pMat.opacity = 1;
+}
+
+/* ───── 트윈 (간단한 애니메이션 도구) ───── */
+const ease = {
+  inOut: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
+  out: (t) => 1 - Math.pow(1 - t, 3),
+  back: (t) => { const c1 = 1.5, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); }
+};
+let tweens = [];
+const tween = (dur, fn, e = ease.inOut, delay = 0) => new Promise((res) => {
+  if (REDUCED) { fn(1); res(); return; }
+  tweens.push({ t: -delay, dur, fn, e, res });
+});
+const sleep = (ms) => new Promise((r) => setTimeout(r, REDUCED ? 0 : ms));
+const lerp = (a, b, t) => a + (b - a) * t;
+
+/* ───── 상태 ───── */
+let opened = false, busy = false, keyOn = false, shakeT = 0, camT = 0;
+const tilesEl = document.getElementById("tiles"), result = document.getElementById("result");
+const WORD = "ONLYONE";
+tilesEl.innerHTML = [...WORD].map(() => `<span class="tile"><b></b></span>`).join("");
+const tiles = [...tilesEl.children];
+const btn = { open: document.getElementById("open"), wrong: document.getElementById("wrong"), reset: document.getElementById("reset") };
+const setBusy = (v) => { busy = v; Object.values(btn).forEach((b) => (b.disabled = v)); };
+
+async function typeWord(word, bad) {
+  tiles.forEach((t) => { t.classList.remove("on", "bad"); t.firstChild.textContent = ""; });
+  for (let i = 0; i < tiles.length; i++) {
+    tiles[i].firstChild.textContent = word[i];
+    tiles[i].classList.add("on");
+    if (bad) tiles[i].classList.add("bad");
+    await sleep(70);
+  }
+}
+
+btn.wrong.onclick = async () => {
+  if (busy || opened) return;
+  setBusy(true);
+  await typeWord("ONLYTWO", true);
+  await tween(0.5, (p) => (dial.rotation.z = Math.sin(p * Math.PI * 4) * 0.35 * (1 - p)), ease.out);
+  shakeT = 0.5;
+  glow.color.set(0xff3b2f);
+  await tween(0.5, (p) => (glow.intensity = Math.sin(p * Math.PI) * 6));
+  glow.color.set(0xffc56b);
+  tilesEl.classList.remove("shake"); void tilesEl.offsetWidth; tilesEl.classList.add("shake");
+  setBusy(false);
+};
+
+btn.open.onclick = async () => {
+  if (busy || opened) return;
+  setBusy(true);
+  document.getElementById("hint").textContent = "딸깍…";
+  await typeWord(WORD, false);
+  /* 1) 다이얼이 두 바퀴 돌며 맞춰짐 */
+  await tween(1.0, (p) => (dial.rotation.z = -p * Math.PI * 4.5));
+  /* 2) 손잡이 회전 + 잠금 막대가 빠짐 */
+  await Promise.all([
+    tween(0.45, (p) => (handle.rotation.z = -p * Math.PI / 2), ease.back),
+    tween(0.35, (p) => bars.forEach((b) => (b.position.x = DW + 0.08 - p * 0.24)), ease.out, 0.15)
+  ]);
+  /* 3) 문이 열리고 카메라가 다가감, 안쪽 빛이 켜짐 */
+  burst();
+  keyOn = true;
+  await Promise.all([
+    tween(1.3, (p) => (door.rotation.y = -p * 1.95), ease.back),
+    tween(1.2, (p) => (camT = p), ease.inOut),
+    tween(0.9, (p) => (glow.intensity = p * 4), ease.out, 0.2),
+    tween(0.9, (p) => { key.scale.setScalar(Math.max(0.001, p)); key.position.y = LIFT + T + 0.62 + p * 0.35; keyLight.intensity = p * 3; }, ease.back, 0.35)
+  ]);
+  opened = true;
+  result.classList.add("show");
+  document.getElementById("hint").textContent = "마우스로 금고 안을 들여다보세요";
+  setBusy(false);
+};
+
+btn.reset.onclick = async () => {
+  if (busy) return;
+  setBusy(true);
+  result.classList.remove("show");
+  keyOn = false;
+  await Promise.all([
+    tween(0.6, (p) => (door.rotation.y = lerp(door.rotation.y, 0, p)), ease.inOut),
+    tween(0.6, (p) => (camT = 1 - p), ease.inOut),
+    tween(0.4, (p) => { glow.intensity *= 1 - p; key.scale.setScalar(Math.max(0.001, 1 - p)); keyLight.intensity *= 1 - p; })
+  ]);
+  key.position.y = LIFT + T + 0.62; key.rotation.y = 0;
+  await tween(0.3, (p) => { handle.rotation.z = lerp(-Math.PI / 2, 0, p); bars.forEach((b) => (b.position.x = DW + 0.08 - 0.24 * (1 - p))); });
+  dial.rotation.z = 0;
+  tiles.forEach((t) => t.classList.remove("on", "bad"));
+  opened = false;
+  document.getElementById("hint").textContent = "마우스로 금고를 둘러보세요";
+  setBusy(false);
+};
+
+/* 버튼 눌림 (키보드 포함) */
+document.querySelectorAll(".b3d").forEach((b) => {
+  b.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") b.classList.add("pressed"); });
+  b.addEventListener("keyup", () => b.classList.remove("pressed"));
+});
+
+/* ───── 마우스를 따라 기울기 ───── */
+const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
+stage.addEventListener("pointermove", (e) => {
+  const r = stage.getBoundingClientRect();
+  mouse.tx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+  mouse.ty = ((e.clientY - r.top) / r.height - 0.5) * 2;
+});
+stage.addEventListener("pointerleave", () => { mouse.tx = 0; mouse.ty = 0; });
+
+/* ───── 크기 맞추기 ───── */
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage);
+resize();
+
+/* ───── 매 프레임 ───── */
+const clock = new THREE.Clock();
+const camPos = new THREE.Vector3();
+renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), 0.05), time = clock.elapsedTime;
+  tweens = tweens.filter((tw) => {
+    tw.t += dt;
+    if (tw.t < 0) return true;
+    const p = Math.min(1, tw.t / tw.dur);
+    tw.fn(tw.e(p));
+    if (p >= 1) { tw.res(); return false; }
+    return true;
+  });
+
+  mouse.x += (mouse.tx - mouse.x) * 0.06;
+  mouse.y += (mouse.ty - mouse.y) * 0.06;
+  camPos.lerpVectors(camBase, camClose, camT);
+  camPos.x += mouse.x * 1.4;
+  camPos.y += -mouse.y * 0.6;
+  camera.position.copy(camPos);
+  camera.lookAt(look);
+
+  /* 틀렸을 때 흔들림 */
+  if (shakeT > 0) { shakeT -= dt; safe.position.x = Math.sin(time * 70) * 0.05 * (shakeT / 0.5); } else safe.position.x = 0;
+
+  /* 열쇠: 천천히 돌며 둥실 */
+  if (keyOn) { key.rotation.y += dt * 1.6; bow.rotation.y = 0; key.position.y += Math.sin(time * 2.4) * 0.0015; }
+
+  /* 입자: 위로 튀었다가 떨어지며 사라짐 */
+  if (pMat.opacity > 0) {
+    for (let i = 0; i < N; i++) {
+      pVel[i * 3 + 1] -= 4.5 * dt;
+      pPos[i * 3] += pVel[i * 3] * dt; pPos[i * 3 + 1] += pVel[i * 3 + 1] * dt; pPos[i * 3 + 2] += pVel[i * 3 + 2] * dt;
+    }
+    pGeo.attributes.position.needsUpdate = true;
+    pMat.opacity = Math.max(0, pMat.opacity - dt * 0.55);
+  }
+  renderer.render(scene, camera);
+});
+</script>
+</body>
+</html>

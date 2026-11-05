@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ONLYONE 레시피를 찾아라</title>
+  <link rel="icon" href="assets/ci/favicon.ico">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <i class="brand-mark" aria-hidden="true">CJ</i>
+      <span>ONLYONE 레시피를 찾아라</span>
+    </div>
+    <div class="hud" id="hud" hidden>
+      <span class="time"><i class="ti ti-clock" aria-hidden="true"></i> <b id="timer">00:00</b> <small id="penalty"></small></span>
+      <button class="btn small ghost" id="hint-btn"><i class="ti ti-bulb" aria-hidden="true"></i> 힌트</button>
+      <button class="btn small ghost round" id="help-btn" aria-label="안내 다시 보기"><i class="ti ti-help" aria-hidden="true"></i></button>
+      <button class="btn small ghost round" id="menu-btn" aria-label="메뉴"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
+    </div>
+  </header>
+  <ol class="progress" id="progress" hidden></ol>
+  <div class="items" id="items"></div>
+
+  <main id="main"></main>
+
+  <footer class="foot"><p id="disclaimer"></p></footer>
+
+  <!-- 단서 보기 모달 -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-head"><h3 id="modal-title"></h3><button class="x" id="modal-close" aria-label="닫기"><i class="ti ti-x" aria-hidden="true"></i></button></div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- 안내 팝업 -->
+  <div class="guide-wrap" id="guide" hidden>
+    <div class="guide-box" id="guide-box" role="dialog" aria-modal="true"></div>
+  </div>
+
+  <!-- 화면 사용법 스포트라이트 -->
+  <div class="coach" id="coach" hidden>
+    <div class="c-shade"></div><div class="c-shade"></div><div class="c-shade"></div><div class="c-shade"></div>
+    <div class="coach-hole" id="coach-hole"></div>
+    <div class="coach-tip" id="coach-tip" role="dialog" aria-modal="true"></div>
+  </div>
+
+  <!-- 막힘 도움 알림 -->
+  <div class="nudge" id="nudge" hidden></div>
+
+  <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+
+  <script src="js/content.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

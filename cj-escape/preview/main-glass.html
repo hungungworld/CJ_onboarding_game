@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>디자인 시안 B: 밝은 유리 스타일</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<style>
+  :root {
+    --red: #C8281C; --red-soft: #FDECEA; --orange: #F39200; --yellow: #FFC20E;
+    --ink: #17171A; --sub: #5E5E66; --muted: #8C8C94; --line: rgba(23,23,26,.08);
+    --glass: rgba(255,255,255,.66); --glass-line: rgba(255,255,255,.85);
+    --shadow: 0 24px 60px -24px rgba(40,30,25,.28), 0 2px 6px rgba(40,30,25,.05);
+    --spring: cubic-bezier(.2,.9,.3,1.15);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; color: var(--ink); background: #F7F5F2; font-family: "CJ Body", "Pretendard", sans-serif; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+  h1, h2 { font-family: "CJ Title", "Pretendard", sans-serif; letter-spacing: -.035em; }
+
+  /* ── 배경: 거의 흰색 + 아주 옅은 브랜드 색 번짐 두 개 ── */
+  .stage { position: relative; min-height: 100vh; overflow: hidden; isolation: isolate;
+    background:
+      radial-gradient(40vw 40vw at 78% 38%, rgba(243,146,0,.10), transparent 70%),
+      radial-gradient(36vw 36vw at 62% 72%, rgba(200,40,28,.08), transparent 70%),
+      #F7F5F2; }
+  .stage canvas.three { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+
+  .tag { position: absolute; top: 20px; right: 24px; z-index: 3; font-size: 12px; color: var(--sub);
+    background: var(--glass); border: 1px solid var(--glass-line); backdrop-filter: blur(16px); padding: 6px 12px; border-radius: 999px; }
+  .brand { position: absolute; top: 22px; left: 32px; z-index: 3; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--sub); }
+  .brand i { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; background: var(--ink); color: #fff; font-size: 16px; font-style: normal; }
+
+  /* ── 왼쪽: 글 + 입장 카드 ── */
+  .hero { position: relative; z-index: 2; min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+    padding: 96px 32px 120px; max-width: 560px; margin-left: max(32px, 6vw); }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; margin: 0 0 20px; font-size: 13px; font-weight: 600; color: var(--red);
+    background: var(--red-soft); padding: 6px 12px; border-radius: 999px; }
+  .eyebrow::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--red); }
+  h1 { margin: 0; font-size: clamp(40px, 5.6vw, 72px); line-height: 1.04; font-weight: 700; }
+  h1 em { font-style: normal; color: var(--red); }
+  .lead { margin: 18px 0 0; font-size: 18px; line-height: 1.6; color: var(--sub); max-width: 24em; }
+  .meta { display: flex; gap: 8px; flex-wrap: wrap; margin: 20px 0 32px; }
+  .meta span { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--sub); padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,.5); }
+  .meta i { font-size: 15px; color: var(--ink); }
+
+  /* 유리 카드 */
+  .glass { background: var(--glass); border: 1px solid var(--glass-line); backdrop-filter: blur(24px) saturate(1.4); -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    border-radius: 20px; box-shadow: var(--shadow); }
+  .entry { padding: 20px; max-width: 420px; }
+  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .fields label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .fields input { height: 46px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,.85); padding: 0 14px; font: inherit; font-size: 15px; color: var(--ink);
+    transition: border-color .2s, box-shadow .2s; }
+  .fields input:focus { outline: none; border-color: rgba(200,40,28,.5); box-shadow: 0 0 0 4px rgba(200,40,28,.10); }
+
+  /* 버튼: 단색, 입체감은 움직임으로 */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 22px; border-radius: 12px; border: none; cursor: pointer;
+    font: inherit; font-size: 15px; font-weight: 600; transition: transform .25s var(--spring), box-shadow .25s, background .2s; }
+  .btn i { font-size: 18px; transition: transform .25s var(--spring); }
+  .btn.primary { background: var(--red); color: #fff; box-shadow: 0 8px 20px -8px rgba(200,40,28,.55); }
+  .btn.primary:hover { transform: translateY(-2px); box-shadow: 0 14px 28px -10px rgba(200,40,28,.6); }
+  .btn.primary:hover i { transform: translateX(3px); }
+  .btn.secondary { background: rgba(23,23,26,.06); color: var(--ink); }
+  .btn.secondary:hover { background: rgba(23,23,26,.1); }
+  .btn:active { transform: scale(.97); }
+  .btn:focus-visible { outline: 3px solid rgba(200,40,28,.35); outline-offset: 2px; }
+  .btn.block { width: 100%; }
+
+  /* 등장: 아래에서 살짝 올라오며 순서대로 */
+  .rise { opacity: 0; transform: translateY(14px); animation: rise .7s var(--spring) forwards; }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+
+  /* 시안 팝업 바로 보기 */
+  .dock { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 3; display: flex; gap: 4px; padding: 6px; border-radius: 16px; flex-wrap: wrap; justify-content: center; width: max-content; max-width: 94vw; }
+  .dock span { align-self: center; padding: 0 8px 0 6px; font-size: 12px; color: var(--muted); }
+  .dock button { border: none; background: transparent; cursor: pointer; font: inherit; font-size: 13px; color: var(--sub); padding: 8px 12px; border-radius: 10px; display: inline-flex; align-items: center; gap: 6px; }
+  .dock button:hover { background: rgba(23,23,26,.06); color: var(--ink); }
+
+  /* ── 팝업 ── */
+  .veil { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 20px; background: rgba(247,245,242,.45);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); opacity: 0; pointer-events: none; transition: opacity .25s; }
+  .veil.show { opacity: 1; pointer-events: auto; }
+  .modal { position: relative; width: min(92vw, 380px); padding: 28px 24px 20px; text-align: center; transform: translateY(10px) scale(.96); opacity: 0;
+    transition: transform .4s var(--spring), opacity .2s; }
+  .veil.show .modal { transform: none; opacity: 1; }
+  .ic { width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 16px; display: grid; place-items: center; font-size: 28px; color: var(--red); background: var(--red-soft); }
+  .ic.gold { color: #A86A00; background: #FFF4D6; }
+  .ic.green { color: #0E7A45; background: #E3F5EC; }
+  .label { margin: 0 0 6px; font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .02em; }
+  .modal h2 { margin: 0 0 8px; font-size: 22px; font-weight: 700; }
+  .lines { margin: 0 auto 22px; max-width: 20em; font-size: 15px; line-height: 1.6; color: var(--sub); }
+  .lines span { display: block; }
+  .actions { display: flex; gap: 8px; }
+  .actions .btn { flex: 1; }
+  .steps { display: flex; gap: 6px; justify-content: center; margin: -8px 0 20px; }
+  .steps i { width: 24px; height: 4px; border-radius: 2px; background: rgba(23,23,26,.1); transition: background .3s; }
+  .steps i.on { background: var(--red); }
+  .x { position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; border-radius: 10px; border: none; background: transparent; cursor: pointer; color: var(--muted); font-size: 18px; display: grid; place-items: center; }
+  .x:hover { background: rgba(23,23,26,.06); color: var(--ink); }
+  .modal.warn .label { color: var(--red); }
+  .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 11; }
+
+  .cap-hint { position: absolute; z-index: 2; right: 15%; bottom: 17%; margin: 0; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--sub);
+    background: var(--glass); border: 1px solid var(--glass-line); backdrop-filter: blur(16px); padding: 6px 12px; border-radius: 999px; transition: opacity .4s; pointer-events: none; }
+  .cap-hint.seen { opacity: 0; }
+  @media (max-aspect-ratio: 1/1) { .cap-hint { right: 50%; transform: translateX(50%); bottom: auto; top: 40vh; } }
+  @media (max-aspect-ratio: 1/1) {
+    .hero { margin: 0 auto; padding: 46vh 20px 120px; max-width: 520px; }
+    h1 { font-size: clamp(36px, 10vw, 52px); }
+    .brand { left: 20px; } .tag { right: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .rise { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="brand"><i>CJ</i>제일제당 온보딩</div>
+  <span class="tag">디자인 시안 B · 밝은 유리 스타일</span>
+
+  <main class="hero">
+    <p class="eyebrow rise" style="animation-delay:.05s">햇반 30주년 타임캡슐</p>
+    <h1 class="rise" style="animation-delay:.12s"><em>ONLYONE</em><br>레시피를 찾아라</h1>
+    <p class="lead rise" style="animation-delay:.2s">사라진 레시피북을 찾아 70년의 이야기를 따라가 보세요.</p>
+    <div class="meta rise" style="animation-delay:.26s">
+      <span><i class="ti ti-clock"></i>45분</span>
+      <span><i class="ti ti-users"></i>3인 1조</span>
+      <span><i class="ti ti-door"></i>3막 · 방 5개</span>
+    </div>
+    <div class="glass entry rise" style="animation-delay:.34s">
+      <div class="fields">
+        <label>조 이름<input placeholder="햇반 조"></label>
+        <label>내 이름<input placeholder="홍길동"></label>
+      </div>
+      <button class="btn primary block" data-open="rules">게임 시작 <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </main>
+
+  <p class="cap-hint" id="cap-hint"><i class="ti ti-hand-finger"></i>타임캡슐을 눌러 보세요</p>
+
+  <nav class="dock glass" aria-label="팝업 시안 바로 보기">
+    <span>팝업 시안</span>
+    <button data-open="rules"><i class="ti ti-users"></i>팀 규칙</button>
+    <button data-open="act"><i class="ti ti-door"></i>막 시작</button>
+    <button data-open="reward"><i class="ti ti-key"></i>보상</button>
+    <button data-open="warn"><i class="ti ti-eye-off"></i>3막 경고</button>
+    <button data-open="hint"><i class="ti ti-bulb"></i>힌트</button>
+  </nav>
+</div>
+
+<!-- 팝업 -->
+<div class="veil" id="v-rules"><div class="modal glass" role="dialog" aria-modal="true">
+  <div class="ic" id="r-ic"><i class="ti ti-device-mobile"></i></div>
+  <p class="label" id="r-label">팀 플레이 규칙 1 / 3</p>
+  <h2 id="r-title">한 사람, 한 기기</h2>
+  <p class="lines" id="r-lines"></p>
+  <div class="steps" id="r-steps"></div>
+  <div class="actions"><button class="btn primary" id="r-next">다음</button></div>
+</div></div>
+
+<div class="veil" id="v-act"><div class="modal glass" role="dialog" aria-modal="true">
+  <div class="ic"><i class="ti ti-door"></i></div>
+  <p class="label">1막 · 70년의 DNA</p>
+  <h2>방 5개를 탈출하세요</h2>
+  <p class="lines"><span>방마다 회사 이야기가 숨어 있어요.</span><span>목표 시간은 약 25분이에요.</span></p>
+  <div class="actions"><button class="btn primary" data-close>시작하기 <i class="ti ti-arrow-right"></i></button></div>
+</div></div>
+
+<div class="veil" id="v-reward"><div class="modal glass" role="dialog" aria-modal="true">
+  <div class="ic gold"><i class="ti ti-key"></i></div>
+  <p class="label">문이 열렸어요</p>
+  <h2>열쇠 단어 획득</h2>
+  <p class="lines"><span><b style="color:var(--red);font-weight:600">ONLYONE</b>은 CJ의 경영철학이에요.</span><span>3막에서 다시 쓰여요.</span></p>
+  <div class="actions"><button class="btn primary" data-close>다음 방으로 <i class="ti ti-arrow-right"></i></button></div>
+</div></div>
+
+<div class="veil" id="v-warn"><div class="modal glass warn" role="dialog" aria-modal="true">
+  <div class="ic"><i class="ti ti-eye-off"></i></div>
+  <p class="label">3막 규칙</p>
+  <h2>내 화면은 나만 봐요</h2>
+  <p class="lines"><span>화면은 보여주지 말고 말로만!</span><span>잘 설명하는 것도 실력이에요.</span></p>
+  <div class="actions"><button class="btn primary" data-close>알겠어요</button></div>
+</div></div>
+
+<div class="veil" id="v-hint"><div class="modal glass" role="dialog" aria-modal="true">
+  <button class="x" data-close aria-label="닫기"><i class="ti ti-x"></i></button>
+  <div class="ic gold"><i class="ti ti-bulb"></i></div>
+  <p class="label">힌트</p>
+  <h2>막혔나요?</h2>
+  <p class="lines"><span>힌트를 열면 기록에</span><span>벌점 시간이 더해져요.</span></p>
+  <div class="actions"><button class="btn secondary" data-close>더 풀어 볼게요</button><button class="btn primary">힌트 보기 +1분</button></div>
+</div></div>
+
+<canvas class="confetti" id="confetti"></canvas>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const RULES = [
+  { ic: "ti-device-mobile", title: "한 사람, 한 기기", lines: ["처음부터 끝까지 같은 기기로", "조장 기기의 기록이 조 기록이에요."] },
+  { ic: "ti-messages", title: "같이 보고, 같이 풀기", lines: ["단서는 나눠 보고 말로 공유해요.", "정답은 누가 입력해도 돼요."] },
+  { ic: "ti-bulb", title: "막히면 힌트", lines: ["힌트는 3단계까지 볼 수 있어요.", "대신 기록에 +1·3·5분이 더해져요."] }
+];
+let ri = 0;
+function drawRule() {
+  const r = RULES[ri];
+  $("#r-ic").innerHTML = `<i class="ti ${r.ic}"></i>`;
+  $("#r-label").textContent = `팀 플레이 규칙 ${ri + 1} / ${RULES.length}`;
+  $("#r-title").textContent = r.title;
+  $("#r-lines").innerHTML = r.lines.map((l) => `<span>${l}</span>`).join("");
+  $("#r-steps").innerHTML = RULES.map((_, k) => `<i class="${k <= ri ? "on" : ""}"></i>`).join("");
+  $("#r-next").innerHTML = ri === RULES.length - 1 ? `게임 시작 <i class="ti ti-arrow-right"></i>` : "다음";
+}
+function open(id) {
+  document.querySelectorAll(".veil").forEach((v) => v.classList.remove("show"));
+  if (id === "rules") { ri = 0; drawRule(); }
+  $("#v-" + id).classList.add("show");
+  dispatchEvent(new CustomEvent("popup", { detail: true }));
+  if (id === "reward") confetti();
+}
+function closeAll() {
+  document.querySelectorAll(".veil").forEach((v) => v.classList.remove("show"));
+  dispatchEvent(new CustomEvent("popup", { detail: false }));
+}
+document.querySelectorAll("[data-open]").forEach((b) => (b.onclick = () => open(b.dataset.open)));
+document.querySelectorAll("[data-close]").forEach((b) => (b.onclick = closeAll));
+document.querySelectorAll(".veil").forEach((v) => v.addEventListener("click", (e) => { if (e.target === v) closeAll(); }));
+$("#r-next").onclick = () => { if (ri < RULES.length - 1) { ri++; drawRule(); } else open("act"); };
+addEventListener("keydown", (e) => { if (e.key === "Escape") closeAll(); });
+
+/* 색종이: 한 번 터지고 끝 */
+function confetti() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const cv = $("#confetti"), x = cv.getContext("2d");
+  cv.width = innerWidth * devicePixelRatio; cv.height = innerHeight * devicePixelRatio; x.scale(devicePixelRatio, devicePixelRatio);
+  const colors = ["#C8281C", "#F39200", "#FFC20E", "#17171A", "#ffffff"];
+  const ps = Array.from({ length: 90 }, () => ({
+    x: innerWidth / 2, y: innerHeight / 2 - 60, vx: (Math.random() - .5) * 14, vy: -Math.random() * 12 - 4,
+    w: 6 + Math.random() * 6, h: 3 + Math.random() * 4, r: Math.random() * 6, vr: (Math.random() - .5) * .4, c: colors[(Math.random() * colors.length) | 0]
+  }));
+  let t = 0;
+  (function frame() {
+    x.clearRect(0, 0, innerWidth, innerHeight);
+    ps.forEach((p) => { p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.globalAlpha = Math.max(0, 1 - t / 110); x.fillStyle = p.c; x.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); x.restore(); });
+    if (++t < 110) requestAnimationFrame(frame); else x.clearRect(0, 0, innerWidth, innerHeight);
+  })();
+}
+</script>
+
+<script type="module">
+/* ── 3D: 무광 점토 재질 타임캡슐 + 꽃잎 세 개 ── */
+import * as THREE from "three";
+import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+
+const stage = document.getElementById("stage");
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.VSMShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.domElement.className = "three";
+stage.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 100);
+
+/* 부드러운 스튜디오 조명: 큰 면광원 느낌 */
+scene.add(new THREE.HemisphereLight(0xffffff, 0xeadfd3, 1.6));
+const key = new THREE.DirectionalLight(0xffffff, 1.6);
+key.position.set(3, 6, 5);
+key.castShadow = true;
+key.shadow.mapSize.set(1024, 1024);
+key.shadow.radius = 18; key.shadow.blurSamples = 20;
+Object.assign(key.shadow.camera, { left: -3, right: 3, top: 3, bottom: -3, near: 1, far: 20 });
+scene.add(key);
+
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.ShadowMaterial({ opacity: 0.12 }));
+ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+
+const clay = (c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.92, metalness: 0 });
+const m = (g, mat, x = 0, y = 0, z = 0) => { const k = new THREE.Mesh(g, mat); k.position.set(x, y, z); k.castShadow = true; k.receiveShadow = true; return k; };
+
+const hero = new THREE.Group(); scene.add(hero);
+/* 납작한 받침 */
+hero.add(m(new THREE.CylinderGeometry(1.2, 1.26, 0.16, 64), clay(0xEFE8DF), 0, 0.08, 0));
+
+/* ── 타임캡슐: 둥근 몸통 + 둥근 돔 뚜껑 + 금색 이음매 + 정면 이름표 판 ── */
+const cap = new THREE.Group(); hero.add(cap);
+const BODY_H = 1.55, R = 0.66;
+/* 몸통: 아래가 둥글게 말린 원통 (회전체로 매끈하게) */
+const bodyProfile = [[0, 0], [R * 0.78, 0], [R * 0.93, 0.04], [R, 0.14], [R, BODY_H]].map(([x, y]) => new THREE.Vector2(x, y));
+cap.add(m(new THREE.LatheGeometry(bodyProfile, 96), clay(0xFBF7F1), 0, 0.16, 0));
+/* 몸통 띠 두 줄 (금색) */
+for (const y of [0.45, 1.3]) {
+  const band = m(new THREE.TorusGeometry(R + 0.005, 0.025, 12, 96), clay(0xE6BE5A), 0, 0.16 + y, 0);
+  band.rotation.x = Math.PI / 2; cap.add(band);
+}
+/* 안쪽 빛 (뚜껑이 열리면 보임) */
+const inner = m(new THREE.CircleGeometry(R - 0.04, 64), new THREE.MeshStandardMaterial({ color: 0xFFE7A8, emissive: 0xFFC24A, emissiveIntensity: 0 }), 0, 0.16 + BODY_H - 0.02, 0);
+inner.rotation.x = -Math.PI / 2; inner.castShadow = false; cap.add(inner);
+const innerLight = new THREE.PointLight(0xffd27a, 0, 3, 2); innerLight.position.set(0, 0.16 + BODY_H + 0.2, 0); cap.add(innerLight);
+
+/* 뚜껑: 뒤쪽 경첩 기준으로 열림 */
+const lidPivot = new THREE.Group(); lidPivot.position.set(0, 0.16 + BODY_H, -R); cap.add(lidPivot);
+const lid = new THREE.Group(); lid.position.set(0, 0, R); lidPivot.add(lid);
+const lidProfile = [[R + 0.03, 0], [R + 0.03, 0.12], [R * 0.95, 0.2], [R * 0.75, 0.32], [R * 0.42, 0.4], [0, 0.42]].map(([x, y]) => new THREE.Vector2(x, y));
+lid.add(m(new THREE.LatheGeometry(lidProfile, 96), clay(0xD9382C)));
+const lidRing = m(new THREE.TorusGeometry(R + 0.03, 0.03, 12, 96), clay(0xE6BE5A), 0, 0.01, 0); lidRing.rotation.x = Math.PI / 2; lid.add(lidRing);
+const knob = m(new THREE.SphereGeometry(0.09, 32, 32), clay(0xE6BE5A), 0, 0.45, 0); lid.add(knob);
+
+/* 정면 이름표 판: 평평한 금속판 + 큰 글자 + 나사 네 개 */
+const plate = new THREE.Group(); plate.position.set(0, 0.16 + 0.88, R + 0.01); cap.add(plate);
+plate.add(m(new RoundedBoxGeometry(0.84, 0.56, 0.05, 4, 0.04), clay(0xF2EEE8)));
+const tagTex = (() => {
+  const c = document.createElement("canvas"); c.width = 840; c.height = 560;
+  const g = c.getContext("2d");
+  g.fillStyle = "#FFFFFF"; g.beginPath(); g.roundRect(20, 20, 800, 520, 36); g.fill();
+  g.textAlign = "center";
+  g.fillStyle = "#C8281C"; g.font = "700 52px Pretendard, sans-serif"; g.fillText("TIME CAPSULE", 420, 150);
+  g.fillStyle = "#17171A"; g.font = "800 112px Pretendard, sans-serif"; g.fillText("햇반 30주년", 420, 300);
+  g.fillStyle = "#5E5E66"; g.font = "600 60px Pretendard, sans-serif"; g.fillText("2026 → 2053", 420, 420);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t;
+})();
+const face = new THREE.Mesh(new THREE.PlaneGeometry(0.78, 0.52), new THREE.MeshStandardMaterial({ map: tagTex, roughness: 0.85 }));
+face.position.z = 0.027; plate.add(face);
+for (const [x, y] of [[-0.36, 0.22], [0.36, 0.22], [-0.36, -0.22], [0.36, -0.22]]) plate.add(m(new THREE.SphereGeometry(0.018, 12, 12), clay(0xC9C2B8), x, y, 0.03));
+
+/* ── 마우스 올리기·누르기 ── */
+const ray = new THREE.Raycaster(), pt = new THREE.Vector2();
+let hover = false, openT = 0, lidTarget = 0;
+const hintEl = document.getElementById("cap-hint");
+function hit(e) {
+  const r = renderer.domElement.getBoundingClientRect();
+  pt.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(pt, camera);
+  return ray.intersectObject(cap, true).length > 0;
+}
+stage.addEventListener("pointermove", (e) => {
+  if (e.target.closest(".glass, .dock, button, input")) { hover = false; stage.style.cursor = ""; return; }
+  hover = hit(e); stage.style.cursor = hover ? "pointer" : "";
+});
+stage.addEventListener("click", (e) => {
+  if (e.target.closest(".glass, .dock, button, input")) return;
+  if (hit(e)) { openT = 2.2; if (hintEl) hintEl.classList.add("seen"); }
+});
+
+const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
+addEventListener("pointermove", (e) => { mouse.tx = (e.clientX / innerWidth - .5) * 2; mouse.ty = (e.clientY / innerHeight - .5) * 2; });
+let pop = 0, popT = 0; addEventListener("popup", (e) => (popT = e.detail ? 1 : 0));
+
+const look = new THREE.Vector3();
+function resize() { renderer.setSize(stage.clientWidth, stage.clientHeight, false); camera.aspect = stage.clientWidth / stage.clientHeight; camera.updateProjectionMatrix(); }
+new ResizeObserver(resize).observe(stage); resize();
+
+const clock = new THREE.Clock();
+let lidA = 0;
+renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
+  mouse.x += (mouse.tx - mouse.x) * .05; mouse.y += (mouse.ty - mouse.y) * .05;
+  pop += (popT - pop) * .08;
+  const wide = camera.aspect >= 1;
+  /* 가로 화면: 캡슐이 입장 카드와 겹치지 않게 화면 오른쪽 3분의 1 지점에 */
+  look.set(wide ? -1.15 - camera.aspect * 0.75 : 0, wide ? 1.2 : 0.5, 0);
+  camera.position.set(look.x + mouse.x * 0.6, 2.1 - mouse.y * .3, (wide ? 9.8 : 11.5) + pop * 1.2);
+  camera.lookAt(look);
+
+  /* 뚜껑: 누르면 크게 열렸다 닫힘, 올리기만 하면 살짝 들림 */
+  if (openT > 0) openT -= dt;
+  lidTarget = openT > 0.4 ? 1.15 : hover ? 0.22 : 0;
+  lidA += (lidTarget - lidA) * (REDUCED ? 1 : 0.12);
+  lidPivot.rotation.x = -lidA;
+  const glow = Math.min(1, lidA / 0.6);
+  inner.material.emissiveIntensity = glow * 1.4;
+  innerLight.intensity = glow * 4;
+
+  if (!REDUCED) {
+    /* 이름표가 늘 읽히도록 좌우로 아주 조금만 흔들림 */
+    cap.rotation.y = Math.sin(t * .6) * .12 + mouse.x * .12;
+    cap.position.y = Math.sin(t * 1.3) * .04 + (hover ? 0.06 : 0);
+  }
+  renderer.render(scene, camera);
+});
+</script>
+</body>
+</html>
