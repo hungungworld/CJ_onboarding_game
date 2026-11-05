@@ -786,7 +786,11 @@
       if (done) return;
       cine.classList.add("dragged");
       const run = ++autoRun;
-      for (const stop of [0, 0.4667, 1]) {
+      /* 1996: 이미 그 자리면 문장만 잠깐 보여 주고 바로 출발 (끌다가 눌렀으면 1996으로 되돌아감) */
+      if (target > 0.01) await moveTo(0, run);
+      await sleep(REDUCED ? 0 : 1500);
+      if (run !== autoRun) return;
+      for (const stop of [0.4667, 1]) {
         await moveTo(stop, run);
         if (run !== autoRun) return;
         if (stop < 1) await sleep(REDUCED ? 0 : 3800);
