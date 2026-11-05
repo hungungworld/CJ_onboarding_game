@@ -58,6 +58,22 @@
     }).join("");
     return fix(out);
   };
+  /* 지문(장면 설명·조작 안내·힌트): 연극 대본의 무대 지문처럼 쓴다
+   * - 첫 문장(장소·핵심)은 혼자 한 줄 → 장면이 열리는 자리
+   * - 나머지 문장은 이어 붙여 너비에 맞춰 자동으로 감긴다 (넓은 화면에서 줄이 뚝뚝 끊기지 않게)
+   * - ①②③ 단계 안내는 단계마다 한 줄 */
+  const prose = (s) => {
+    if (s == null) return "";
+    const lines = String(s).split(/\s*\n\s*/).filter(Boolean);
+    if (lines.some((l) => /^[①-⑨]/.test(l))) {
+      const steps = [];
+      lines.forEach((l) => (/^[①-⑨]/.test(l) || !steps.length ? steps.push(l) : (steps[steps.length - 1] += " " + l)));
+      return fix(steps.join("\n"));
+    }
+    const all = lines.join(" ");
+    const m = all.match(/^(.+?[.!?])\s+(.+)$/);
+    return fix(m ? m[1] + "\n" + m[2] : all);
+  };
   // 좁은 카드 여러 장이 나란히 놓일 때(증언 카드): 길이와 상관없이 자동으로 감아 카드끼리 모양을 맞춘다
   const flow = (s) => fix(s == null ? "" : String(s).replace(/\s*\n\s*/g, " "));
   const lines = (arr) => arr.map((l) => `<span class="ln">${fix(l)}</span>`).join("");
@@ -515,7 +531,7 @@
 
   /* ── 손전등 (보안실) ── */
   function flashlight(box, html, note) {
-    box.innerHTML = `<p class="note">${body(note)}</p><div class="darkroom">${html}<div class="torch" aria-hidden="true"></div></div>`;
+    box.innerHTML = `<p class="note">${prose(note)}</p><div class="darkroom">${html}<div class="torch" aria-hidden="true"></div></div>`;
     const room = $(".darkroom", box), torch = $(".torch", box);
     const mv = (e) => {
       const r = room.getBoundingClientRect();
@@ -620,7 +636,7 @@
     const show = () => {
       const lv = S.hintLv[key] || 0;
       let html = lv ? "" : `<p>${body("막혔나요?\n힌트를 열면 기록에 벌점 시간이 더해져요.")}</p>`;
-      for (let i = 0; i < lv; i++) html += `<div class="hint"><b>힌트 ${i + 1}</b><span>${body(list[i])}</span></div>`;
+      for (let i = 0; i < lv; i++) html += `<div class="hint"><b>힌트 ${i + 1}</b><span>${prose(list[i])}</span></div>`;
       if (lv < list.length) {
         const cost = C.hintPenalty[lv] / 60;
         html += `<button class="btn primary" id="more-hint">${lv === list.length - 1 ? "정답 보기" : `힌트 ${lv + 1} 보기`} <span class="nw">(+${cost}분)</span></button>`;
@@ -894,7 +910,7 @@
         <header class="room-head">
           <p class="eyebrow">1막 「70년의 DNA」 · 방 ${room.no} / ${C.rooms.length} · ${room.theme}</p>
           <h2>${room.title}</h2>
-          <p>${body(room.intro)}</p>
+          <p>${prose(room.intro)}</p>
         </header>
         <div class="objects">${room.objects.map((o, i) =>
           `<button class="obj" data-obj="${i}"><span class="obj-ic">${ic(o.icon)}</span>${o.label}</button>`).join("")}</div>
@@ -998,7 +1014,7 @@
         const onWall = st.slots.filter((x) => x !== null);
         el.innerHTML = `
           <h3><i class="ti ti-photo" aria-hidden="true"></i> 역사 갤러리</h3>
-          <p class="help">${body(P.help)}</p>${P.alt ? `<p class="alt-hint"><i class="ti ti-hand-click" aria-hidden="true"></i>${body(P.alt)}</p>` : ""}
+          <p class="help">${prose(P.help)}</p>${P.alt ? `<p class="alt-hint"><i class="ti ti-hand-click" aria-hidden="true"></i>${prose(P.alt)}</p>` : ""}
           <ol class="wall">${st.slots.map((ci, i) => {
             if (ci === null) return `<li class="slot empty" data-slot="${i}"><span>${i + 1}</span></li>`;
             const c = P.cards[ci];
@@ -1008,7 +1024,7 @@
                 <div class="f-back"><b>${c.letter}</b><small>${c.year}</small></div>
               </div></li>`;
           }).join("")}</ol>
-          ${st.done ? `<p class="done-msg"><i class="ti ti-sparkles" aria-hidden="true"></i> ${body(P.doneText)}</p>` : `
+          ${st.done ? `<p class="done-msg"><i class="ti ti-sparkles" aria-hidden="true"></i> ${prose(P.doneText)}</p>` : `
           <p class="sub-h">바닥에 떨어진 액자</p>
           <div class="floor" data-floor="1" data-demo="frames">${st.order.filter((i) => !onWall.includes(i)).map((i) =>
             `<div class="frame pick" data-card="${i}" tabindex="0" role="button"><div class="f-front">${frameInner(P.cards[i])}</div></div>`).join("")
@@ -1066,7 +1082,7 @@
         const kwDone = P.keywords.every((k, i) => st.kw[i] === k.answer);
         el.innerHTML = `
           <h3><i class="ti ti-cards" aria-hidden="true"></i> 상황 카드와 포스트잇</h3>
-          <p class="help">${body(P.help)}</p>${P.alt ? `<p class="alt-hint"><i class="ti ti-hand-click" aria-hidden="true"></i>${body(P.alt)}</p>` : ""}
+          <p class="help">${prose(P.help)}</p>${P.alt ? `<p class="alt-hint"><i class="ti ti-hand-click" aria-hidden="true"></i>${prose(P.alt)}</p>` : ""}
           <p class="sub-h">① 이 행동은 어떤 행동원칙일까요?</p>
           <div class="connect" data-demo="connect">
             <svg class="wires"></svg>
@@ -1084,7 +1100,7 @@
               <span>${P.keywords.map((k, i) => st.kw[i] === v ? `<em>${k.text}</em>` : "").join("")}</span>
             </div>`).join("")}</div>
           ${sitDone && kwDone ? `
-            <p class="done-msg"><i class="ti ti-sparkles" aria-hidden="true"></i> ${body(P.doneText)}</p>
+            <p class="done-msg"><i class="ti ti-sparkles" aria-hidden="true"></i> ${prose(P.doneText)}</p>
             <div class="scratch ${st.scratched ? "revealed" : ""}" data-demo="scratch" role="img" aria-label="화이트보드의 지워진 자리: ${P.scratchHidden}">
               <span class="hidden-text">${P.scratchHidden}</span>
               ${st.scratched ? "" : "<canvas></canvas>"}
@@ -1179,7 +1195,7 @@
       const draw = () => {
         el.innerHTML = `
           <h3><i class="ti ti-shopping-cart" aria-hidden="true"></i> 식료품 선반</h3>
-          <p class="help">${body(P.help)}</p>${P.alt ? `<p class="alt-hint"><i class="ti ti-hand-click" aria-hidden="true"></i>${body(P.alt)}</p>` : ""}
+          <p class="help">${prose(P.help)}</p>${P.alt ? `<p class="alt-hint"><i class="ti ti-hand-click" aria-hidden="true"></i>${prose(P.alt)}</p>` : ""}
           <div class="kitchen">
             <div class="shelf">${P.items.map((it, i) => `
               <div class="product ${st.basket.includes(it.slot) ? "taken" : ""}" data-p="${i}" tabindex="0" role="button" aria-label="${it.slot}번 칸 ${it.name}">
@@ -1217,7 +1233,7 @@
       };
       const info = (i) => {
         const it = P.items[i];
-        openModal(`${it.slot}번 칸 · ${it.name}`, `<img class="modal-img" src="${it.img}" alt="${it.name}"><p>${body(it.info)}</p>
+        openModal(`${it.slot}번 칸 · ${it.name}`, `<img class="modal-img" src="${it.img}" alt="${it.name}"><p>${prose(it.info)}</p>
           <div class="row"><button class="btn primary" id="to-basket" ${st.basket.includes(it.slot) ? "disabled" : ""}><i class="ti ti-basket" aria-hidden="true"></i> 바구니에 담기</button></div>`,
         (b) => { $("#to-basket", b).onclick = () => { closeModal(); add(i); }; });
       };
@@ -1232,7 +1248,7 @@
         const all = P.samples.every((_, i) => st.placed[i]);
         el.innerHTML = `
           <h3><i class="ti ti-test-pipe" aria-hidden="true"></i> 발효 탱크</h3>
-          <p class="help">${body(P.help)}</p>${P.alt ? `<p class="alt-hint"><i class="ti ti-hand-click" aria-hidden="true"></i>${body(P.alt)}</p>` : ""}
+          <p class="help">${prose(P.help)}</p>${P.alt ? `<p class="alt-hint"><i class="ti ti-hand-click" aria-hidden="true"></i>${prose(P.alt)}</p>` : ""}
           <div class="tanks">${P.tanks.map((t) => {
             const inside = P.samples.filter((s, i) => st.placed[i] === t.id);
             const need = P.samples.filter((s) => s.tank === t.id).length;
@@ -1250,7 +1266,7 @@
             return `<button class="sample ${st.sel === i ? "sel" : ""}" data-s="${i}">
               <img src="${s.img}" alt="${s.name}" loading="lazy"><b>${s.name}</b><small>${s.info}</small></button>`;
           }).join("")}</div>
-          ${all ? `<p class="done-msg"><i class="ti ti-sparkles" aria-hidden="true"></i> ${body(P.doneText)}</p>` : ""}`;
+          ${all ? `<p class="done-msg"><i class="ti ti-sparkles" aria-hidden="true"></i> ${prose(P.doneText)}</p>` : ""}`;
         dnd(el, {
           item: "[data-s]", zone: "[data-tank]",
           drop: (item, z) => put(+item.dataset.s, z),
@@ -1283,7 +1299,7 @@
         const quizAll = P.quiz.every((_, i) => st.quiz[i]);
         el.innerHTML = `
           <h3><i class="ti ti-message-circle" aria-hidden="true"></i> 메신저 초안</h3>
-          <p class="help">${body(P.help)}</p>${P.alt ? `<p class="alt-hint"><i class="ti ti-hand-click" aria-hidden="true"></i>${body(P.alt)}</p>` : ""}
+          <p class="help">${prose(P.help)}</p>${P.alt ? `<p class="alt-hint"><i class="ti ti-hand-click" aria-hidden="true"></i>${prose(P.alt)}</p>` : ""}
           <div class="chat"><div class="bubble">${P.message.map((m) => {
             if (typeof m === "string") return esc(m);
             const i = ti++;
@@ -1298,7 +1314,7 @@
                 q.options.map((o, j) => `<button class="btn small" data-q="${i}" data-a="${j}">${o}</button>`).join("")}</div>
             </div>` : `
             <button class="qcard back" data-flip="${i}"><span class="qb-no">Q${i + 1}</span><span>${fix("용어 카드\n눌러서 뒤집기")}</span></button>`).join("")}</div>
-          ${fixedAll && quizAll ? `<p class="done-msg"><i class="ti ti-sparkles" aria-hidden="true"></i> ${body(P.doneText)}</p>` : ""}`;
+          ${fixedAll && quizAll ? `<p class="done-msg"><i class="ti ti-sparkles" aria-hidden="true"></i> ${prose(P.doneText)}</p>` : ""}`;
         $$("[data-fix]", el).forEach((b) => (b.onclick = () => { st.fixed[+b.dataset.fix] = true; save(); draw(); }));
         $$("[data-flip]", el).forEach((b) => (b.onclick = () => { st.flip[+b.dataset.flip] = true; save(); draw(); }));
         $$("[data-q]", el).forEach((b) => (b.onclick = () => {
@@ -1326,7 +1342,7 @@
         <header class="room-head">
           <p class="eyebrow">2막 · 증언 추리</p>
           <h2>${A.title}</h2>
-          <p>${body(A.intro)}</p>
+          <p>${prose(A.intro)}</p>
           ${A.introSay ? say(A.introSay.who, A.introSay.text) : ""}
         </header>
         <div class="objects"><button class="obj" id="evi"><span class="obj-ic">${ic(A.evidence.icon)}</span>${A.evidence.label}</button></div>
@@ -1338,7 +1354,7 @@
           </article>`).join("")}</div>
         <div class="card">
           <h3><i class="ti ti-search" aria-hidden="true"></i> 블라썸의 확인 질문</h3>
-          <p class="help">${body(allQ ? "확인 질문을 모두 맞혔어요.\n이제 레시피북을 가져간 사람을 지목하세요!" : "질문 3개를 모두 맞혀야\n지목할 수 있어요.")}</p>
+          <p class="help">${prose(allQ ? "확인 질문을 모두 맞혔어요.\n이제 레시피북을 꺼낸 사람을 지목하세요!" : "질문 3개를 모두 맞혀야\n지목할 수 있어요.")}</p>
           <div class="quiz">${A.questions.map((q, i) => `
             <div class="qcard ${st.q[i] ? "ok" : ""}">
               <p><b>Q${i + 1}.</b> ${body(q.q)}</p>
@@ -1434,7 +1450,7 @@
         <header class="room-head">
           <p class="eyebrow">3막 · 팀 협동</p>
           <h2>${T.title}</h2>
-          <p>${body(T.intro)}</p>
+          <p>${prose(T.intro)}</p>
         </header>
         <div class="roles">${Object.keys(r).map((k) => `
           <button class="role" data-role="${k}" style="--c:${r[k].color}">
