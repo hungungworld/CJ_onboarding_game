@@ -142,7 +142,11 @@
   }
 
   /* ═════════ 일반 모달 (단서 보기) ═════════ */
-  function openModal(title, html, onOpen) {
+  /* 팝업 두 종류 (ui-text-layout-rules.md §11-4)
+   * - 기본(내용 창): 단서·힌트·제품 설명. 넓고, 모두 왼쪽 정렬
+   * - dialog(확인 창): 메뉴·다시 하기처럼 짧은 알림과 질문. 좁고, 제목·문장·버튼 모두 가운데 */
+  function openModal(title, html, onOpen, opts = {}) {
+    $(".modal-box").classList.toggle("dialog", !!opts.dialog);
     $("#modal-title").innerHTML = fix(title);
     $("#modal-body").innerHTML = html;
     $("#modal").hidden = false;
@@ -635,7 +639,7 @@
     if (!list) return;
     const show = () => {
       const lv = S.hintLv[key] || 0;
-      let html = lv ? "" : `<p>${body("막혔나요?\n힌트를 열면 기록에 벌점 시간이 더해져요.")}</p>`;
+      let html = lv ? "" : `<p>${prose("막혔나요?\n힌트를 열면 기록에 벌점 시간이 더해져요.")}</p>`;
       for (let i = 0; i < lv; i++) html += `<div class="hint"><b>힌트 ${i + 1}</b><span>${prose(list[i])}</span></div>`;
       if (lv < list.length) {
         const cost = C.hintPenalty[lv] / 60;
@@ -680,7 +684,7 @@
   /* 처음부터 다시: 브라우저 기본 confirm 창은 일부 브라우저(앱 안 브라우저 등)에서 뜨지 않아 게임 안 확인 창을 쓴다 */
   function askRestart() {
     openModal('<i class="ti ti-refresh" aria-hidden="true"></i> 처음부터 다시 하기', `
-      <p class="center">${fix("지금까지의 기록이 지워져요.\n처음부터 다시 할까요?")}</p>
+      <p>${fix("지금까지의 기록이 모두 지워져요.\n처음부터 다시 할까요?")}</p>
       <div class="row">
         <button class="btn" id="r-cancel">취소</button>
         <button class="btn primary" id="r-ok">처음부터 다시</button>
@@ -688,19 +692,20 @@
       $("#r-cancel", b).onclick = closeModal;
       $("#r-ok", b).onclick = () => { S = fresh(); save(); closeModal(); render(); window.scrollTo(0, 0); };
       setTimeout(() => $("#r-cancel", b).focus(), 50);
-    });
+    }, { dialog: true });
   }
 
   $("#menu-btn").addEventListener("click", () => {
-    openModal("메뉴", `
-      <p>${body("진행 상황은\n이 브라우저에 자동 저장돼요.")}</p>
+    openModal('<i class="ti ti-menu-2" aria-hidden="true"></i> 메뉴', `
+      <p>${fix("진행 상황은 이 브라우저에 자동 저장돼요.")}</p>
       <div class="row">
         <button class="btn" id="m-restart">처음부터 다시 하기</button>
         <button class="btn primary" id="m-close">계속하기</button>
       </div>`, (b) => {
       $("#m-close", b).onclick = closeModal;
       $("#m-restart", b).onclick = askRestart;
-    });
+      setTimeout(() => $("#m-close", b).focus(), 50);
+    }, { dialog: true });
   });
 
   /* ═════════ 장면 전환 ═════════ */
@@ -833,7 +838,7 @@
     };
     $("#c-skip").onclick = () => { autoRun++; arrive(); };
     $("#c-jump").onclick = () => openModal(`${ic("ti-list")} 장면 바로 가기`,
-      `<p class="note">${body("심사·데모용이에요. 고른 장면부터 바로 시작해요.")}</p>
+      `<p class="note">${prose("심사·데모용이에요. 고른 장면부터 바로 시작해요.")}</p>
        <div class="chips">${STEPS.map((s, i) => `<button class="btn small" data-jump="${s}">${STEP_LABEL[i]}</button>`).join("")}</div>`,
       (b) => $$("[data-jump]", b).forEach((x) => (x.onclick = () => { closeModal(); demoJump(x.dataset.jump); })));
 

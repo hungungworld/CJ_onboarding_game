@@ -916,3 +916,15 @@ p, li { text-wrap: pretty; }
 /* 소품: 손으로 쓴 메모는 왼쪽 정렬, 서명만 오른쪽 */
 .memo { margin: 0; font-size: 17px; line-height: 1.75; }
 .sign { margin: 10px 0 0; text-align: right; font-size: 14px; color: var(--sub); }
+
+/* 팝업 두 종류 (ui-text-layout-rules.md §11-4)
+ * 내용 창(기본): 넓게, 제목·본문·버튼 모두 왼쪽 축
+ * 확인 창(.dialog): 좁게, 제목·문장·버튼 모두 가운데 축. 닫기(X)는 오른쪽 위 구석에 띄워 축을 흐트러뜨리지 않음 */
+.modal-box:not(.dialog) .row { justify-content: flex-start; }
+.modal-box.dialog { max-width: 400px; text-align: center; }
+.modal-box.dialog .modal-head { position: relative; justify-content: center; padding: 26px 52px 0; }
+.modal-box.dialog .modal-head h3 { justify-content: center; }
+.modal-box.dialog .modal-head .x { position: absolute; top: 14px; right: 14px; }
+.modal-box.dialog .modal-body { padding: 12px 24px 26px; }
+.modal-box.dialog .modal-body p { margin-left: auto; margin-right: auto; text-wrap: balance; }
+.modal-box.dialog .row { justify-content: center; margin-top: 20px; }
