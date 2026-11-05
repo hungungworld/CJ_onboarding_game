@@ -716,7 +716,7 @@
     main.innerHTML = `
       <section class="cine" id="cine">
         <div class="cine-layer then"><img src="${N.then.img}" alt="${esc(N.then.alt)}"></div>
-        <div class="cine-layer now"><img src="${N.now.img}" alt="${esc(N.now.alt)}"></div>
+        <div class="cine-layer now"><img class="cine-fill-img" src="${N.now.img}" alt="" aria-hidden="true"><img class="cine-main-img" src="${N.now.img}" alt="${esc(N.now.alt)}"></div>
         <div class="cine-grain" aria-hidden="true"></div><div class="cine-shade" aria-hidden="true"></div>
         <div class="cine-top">
           <div class="cine-brand"><img class="brand-logo" src="assets/ci/cj_logo_white.svg" alt="CJ제일제당"><span>신입 온보딩</span></div>
@@ -806,7 +806,7 @@
       const run = ++autoRun;
       /* 1996: 이미 그 자리면 문장만 잠깐 보여 주고 바로 출발 (끌다가 눌렀으면 1996으로 되돌아감) */
       if (target > 0.01) await moveTo(0, run);
-      await sleep(REDUCED ? 0 : 1500);
+      await sleep(REDUCED ? 0 : 900);
       if (run !== autoRun) return;
       for (const stop of [0.4667, 1]) {
         await moveTo(stop, run);
@@ -1072,7 +1072,7 @@
             <svg class="wires"></svg>
             <div class="c-left">${P.situations.map((s, i) => `
               <button class="c-card ${st.sit[i] ? "ok" : ""} ${st.sel === i ? "sel" : ""}" data-sit="${i}" ${st.sit[i] ? "disabled" : ""}>
-                <span>${body(s.text)}</span><i class="dot"></i></button>`).join("")}</div>
+                <span>${flow(s.text)}</span><i class="dot"></i></button>`).join("")}</div>
             <div class="c-right">${st.prOrder.map((p) => `
               <button class="c-pr" data-pr="${p}"><i class="dot"></i>${p}</button>`).join("")}</div>
           </div>
@@ -1313,7 +1313,7 @@
 
   function frameInner(c) {
     const pic = c.img ? `<img src="${c.img}" alt="" loading="lazy" draggable="false">` : `<span class="emoji">${ic(c.emoji || "ti-building-factory-2")}</span>`;
-    return `<span class="pic">${pic}</span><span class="cap">${body(c.text)}</span>`;
+    return `<span class="pic">${pic}</span><span class="cap">${flow(c.text)}</span>`;
   }
 
   /* ═════════ 2막: 손전등 + 길게 눌러 지목 ═════════ */
